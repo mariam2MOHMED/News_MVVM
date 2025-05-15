@@ -43,6 +43,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         body:selectedCategory!=null? CategoryDetials(
+
           id: selectedCategory!.id!,
         ):cats==
             MyDrawer.Categories? CategoryTab(

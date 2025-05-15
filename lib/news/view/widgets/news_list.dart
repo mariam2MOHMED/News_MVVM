@@ -6,13 +6,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:newshttp/api_managers/api_services.dart';
+import 'package:newshttp/categoey/category_detials.dart';
 import 'package:newshttp/news/view_model/cubit/news_view_model_cubit.dart';
 import 'package:newshttp/shared/app_theme.dart';
 import 'package:newshttp/news/data/models/news_model.dart';
 
 import 'package:newshttp/news/view/widgets/news_detials.dart';
 import 'package:newshttp/news/view/widgets/news_item.dart';
-import 'package:newshttp/news/view_model/news_view_model.dart';
+
 import 'package:newshttp/shared/widgets/error_widget.dart';
 import 'package:newshttp/shared/widgets/loading_eidget.dart';
 
@@ -126,32 +127,30 @@ import 'package:provider/provider.dart';
 //   }
 // }
 class NewsList extends StatefulWidget {
-  String sourceId;
-  NewsList({required this.sourceId});
+  final String sourceId;
+
+  const NewsList({required this.sourceId, Key? key}) : super(key: key);
 
   @override
   State<NewsList> createState() => _NewsListState();
 }
 
 class _NewsListState extends State<NewsList> {
-  ScrollController screoll = ScrollController();
-  bool lastPage = false;
-  int page = 1;
-  List<Articles> articles = [];
-
-
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    // Fetch initial data
+    // Fetch initial data for the current sourceId
+    BlocProvider.of<NewsViewModelCubit>(context).fetchNews(sourceId: widget.sourceId);
 
-    screoll.addListener(() {
-      if (screoll.position.atEdge && screoll.position.
-      pixels != 0
-          && !lastPage) {
-        page++; // Increment page number
-      //  fetchNews(); // Fetch more data on scroll
+    // Add scroll listener for pagination
+    _scrollController.addListener(() {
+      if (_scrollController.position.atEdge &&
+          _scrollController.position.pixels != 0 &&
+          !BlocProvider.of<NewsViewModelCubit>(context).lastPage) {
+        BlocProvider.of<NewsViewModelCubit>(context).page++;
+        BlocProvider.of<NewsViewModelCubit>(context).fetchNews(sourceId: widget.sourceId);
       }
     });
   }
@@ -159,55 +158,52 @@ class _NewsListState extends State<NewsList> {
   @override
   void didUpdateWidget(covariant NewsList oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.sourceId != oldWidget.sourceId) {
+      // Reset cubit state and fetch new data when sourceId changes
+      final cubit = BlocProvider.of<NewsViewModelCubit>(context);
+      cubit.page = 1;
+      cubit.news.clear();
+      cubit.lastPage = false;
+      cubit.fetchNews(sourceId: widget.sourceId);
+    }
+  }
 
-      page = 1; // Reset page number
-      articles.clear(); // Clear previous articles
-      lastPage = false; // Reset lastPage flag
-      fetchNews(); // Fetch new data
-
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // viewModel.getNews(
-    //   sourceId: widget.sourceId,page: page,
-    //
-    // );
-    final cubit =BlocProvider.of<NewsViewModelCubit>(context);
-    print("$page -------------------------------------------------");
-    return BlocProvider(create: (context)=>NewsViewModelCubit()..getNews(widget.sourceId),
-    child: BlocBuilder<NewsViewModelCubit,NewsViewModelState>
-      (builder: (context,state){
-        if(state is NewsViewModelError){
+    return BlocBuilder<NewsViewModelCubit, NewsViewModelState>(
+      builder: (context, state) {
+        if (state is NewsViewModelError) {
           return myErrorWidget();
-        }else if(state is NewsViewModelSucess){
-          return  Expanded(
+        } else if (state is NewsViewModelSucess) {
+          if (state.news.isEmpty) {
+            return const Center(child: Text('No news available'));
+          }
+          return Expanded(
             child: ListView.separated(
-              controller: screoll,
-              itemBuilder: (context,index){
-                articles=
-                    state.news!??[];
-                return  InkWell(
-                  onTap: (){
+              controller: _scrollController,
+              itemBuilder: (context, index) {
+                return InkWell(
+                  onTap: () {
                     Navigator.pushNamed(context,
-                        NewsDetials.routeName,arguments: articles[index]);
+        NewsDetials.routeName,arguments: state.news[index]);
                   },
-                  child: NewsItem(
-                    news: articles[index],
-                  ),
+                  child: NewsItem(news: state.news[index]),
                 );
-              }, separatorBuilder: (context,index){
-              return  SizedBox(height: 14.0,);
-            }, itemCount: state.news.length ?? 0,
+              },
+              separatorBuilder: (context, index) => const SizedBox(height: 14.0),
+              itemCount: state.news.length,
             ),
           );
-        }else{
-          return LoadingWidget();
+        } else {
+          return const LoadingWidget();
         }
-    }),
+      },
     );
-
-
-
   }
 }

@@ -14,3 +14,4 @@ class NewsViewModelError extends NewsViewModelState {
 
   NewsViewModelError({required this.error});
 }
+class NewsViewModelFetchNews extends NewsViewModelState {}
