@@ -1,0 +1,12 @@
+{
+  "sports": "Sports",
+  "politics": "Politics",
+  "health": "Health",
+  "bussines": "Bussines",
+  "entertainment": "Entertainment",
+  "science":"Science",
+  "newsapp": "News App",
+  "pickyourcategory": "Pick your category of\n your interset",
+  "categories": "Categories",
+  "settings": "Settings"
+}

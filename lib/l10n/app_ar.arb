@@ -1,0 +1,12 @@
+{
+  "sports": "رياضة",
+  "politics": "السياسة",
+  "health": "الصحة",
+  "bussines": "الاعمال",
+  "entertainment": "الترفيه",
+  "science":"العلوم",
+  "newsapp": "تطبيق الاخبار",
+  "pickyourcategory": "اختر فئة اهتمامك",
+  "categories": "فئات",
+  "settings": "الاعدادات"
+}
