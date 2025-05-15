@@ -76,13 +76,13 @@ class NewsViewModelCubit extends Cubit<NewsViewModelState> {
   Future<void> fetchNews({required String sourceId}) async {
     emit(NewsViewModelLoading());
     try {
-      final response = await ApiServices.
-      getNews(sourceId: sourceId, page: page);
-      if (response.articles != null) {
-        if (response.articles!.length < 10) {
+      final newsNews = await newsRepositry.
+      getNews(sourceId);
+      if (newsNews != null) {
+        if (newsNews.length < 10) {
           lastPage = true;
         }
-        news.addAll(response.articles!);
+        news.addAll(newsNews!);
         emit(NewsViewModelSucess(news: news));
       } else {
         emit(NewsViewModelError(error: 'No articles found'));

@@ -142,7 +142,8 @@ class _NewsListState extends State<NewsList> {
   void initState() {
     super.initState();
     // Fetch initial data for the current sourceId
-    BlocProvider.of<NewsViewModelCubit>(context).fetchNews(sourceId: widget.sourceId);
+    BlocProvider.of<NewsViewModelCubit>(context).
+    fetchNews(sourceId: widget.sourceId);
 
     // Add scroll listener for pagination
     _scrollController.addListener(() {
